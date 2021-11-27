@@ -20,16 +20,32 @@ router.get("/getAll", async (req, res) => {
   }
 });
 
+router.post("/checkUsername", async (req, res) => {
+  try {
+    let { userName } = req.body;
+
+    if (userName) {
+      var isNameUnique = await isUserNameUnique(userName);
+    } else {
+      throw new error();
+    }
+
+    res.status(200).json({ isUnique: isNameUnique });
+  } catch (e) {
+    res.status(500).json({ error: "Unable to check Username" });
+  }
+});
+
 //add new company
 router.post("/addCompany", async (req, res) => {
   try {
-    let { companyName, companyAddress, userName, password } = req.body;
+    let { companyName, email, userName, password } = req.body;
 
     if (await isUserNameUnique(userName)) {
       let hashPassword = getHashedPassword(password);
 
       await db.query(
-        `insert into companies(companyname,companyaddress,username,password) values('${companyName}','${companyAddress}','${userName}','${hashPassword}')`,
+        `insert into companies(companyname,email,username,password) values('${companyName}','${email}','${userName}','${hashPassword}')`,
         { types: QueryTypes.INSERT }
       );
 
@@ -55,16 +71,14 @@ router.post("/SignIn", async (req, res) => {
         .status(400)
         .json({ error: errorMessages.company.invalidLoginCredential });
     } else {
-      res.setHeader(
-        "Set-Cookie",
-        "visited=true; Max-Age=3000; HttpOnly, Secure"
-      );
-      res.cookie("cookieName", "1", {
-        expires: new Date(Date.now() + 900000),
+      const oneDayToSeconds = 24 * 60 * 60;
+      res.cookie("Comp_Token", token, {
+        maxAge: oneDayToSeconds,
         httpOnly: true,
+        secure: process.env.NODE_ENV === "production" ? true : false,
       });
 
-      res.status(200).json({ token: token });
+      res.status(200).json({ loggedIn: true });
     }
   } catch (e) {
     res.status(400).json({ error: e });

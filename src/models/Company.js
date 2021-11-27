@@ -10,7 +10,7 @@ const Companies = db.define("companies", {
   companyname: {
     type: Sequelize.STRING,
   },
-  companyaddress: {
+  email: {
     type: Sequelize.STRING,
   },
   userName: {
