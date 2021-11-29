@@ -74,7 +74,7 @@ router.post("/SignIn", async (req, res) => {
       const oneDayToSeconds = 24 * 60 * 60;
       res.cookie("Comp_Token", token, {
         maxAge: oneDayToSeconds,
-        httpOnly: true,
+        httpOnly: false,
         secure: process.env.NODE_ENV === "production" ? true : false,
       });
 
