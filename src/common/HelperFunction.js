@@ -14,14 +14,35 @@ exports.verifyPassword = (password, hash) => {
   return bcrypt.compareSync(password, hash);
 };
 
-exports.generateWebToken = (userName) => {
+exports.generateWebToken = (userName, companyId) => {
   let token = jwt.sign(
     {
-      data: userName,
+      data: companyId + "",
     },
     process.env.TOKEN_SECRET,
     { expiresIn: "3h" }
   );
 
   return token;
+};
+
+exports.verifyToken = (tokenString) => {
+  return new Promise((resolve, reject) => {
+    if (tokenString === undefined) {
+      resolve(false);
+    } else {
+      jwt.verify(
+        tokenString,
+        process.env.TOKEN_SECRET,
+        function (err, decoded) {
+          if (err) {
+            resolve(false);
+          } else {
+            console.log(decoded);
+            resolve(decoded);
+          }
+        }
+      );
+    }
+  });
 };

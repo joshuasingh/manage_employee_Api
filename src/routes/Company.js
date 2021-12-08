@@ -4,7 +4,11 @@ const db = require("../configuration/sqlConnection");
 const Company = require("../models/Company");
 const { QueryTypes } = require("sequelize");
 const { getHashedPassword } = require("../common/HelperFunction");
-const { isUserNameUnique, verifyAccount } = require("../DataAccess/Company");
+const {
+  isUserNameUnique,
+  verifyAccount,
+  createNewDataBaseForCompany,
+} = require("../DataAccess/Company");
 const { errorMessages } = require("../common/constant");
 
 //get all companies
@@ -49,6 +53,9 @@ router.post("/addCompany", async (req, res) => {
         { types: QueryTypes.INSERT }
       );
 
+      //add here the New DB creation
+      //await createNewDataBaseForCompany("ww1");
+
       res.status(200).json({ isCompanyUpdated: true });
     } else {
       res.status(201).json({ error: errorMessages.company.userNameExist });
@@ -81,7 +88,7 @@ router.post("/SignIn", async (req, res) => {
       res.status(200).json({ loggedIn: true });
     }
   } catch (e) {
-    res.status(400).json({ error: e });
+    res.status(400).json({ error: "Unable to SignIn" });
   }
 });
 

@@ -2,6 +2,7 @@ const db = require("../configuration/sqlConnection");
 const { QueryTypes } = require("sequelize");
 const { verifyPassword } = require("../common/HelperFunction");
 const { generateWebToken } = require("../common/HelperFunction");
+const e = require("express");
 
 exports.isUserNameUnique = async (userName) => {
   const result = await db.query(
@@ -10,6 +11,15 @@ exports.isUserNameUnique = async (userName) => {
   );
 
   return result.length !== 0 ? result[0][0].count === "0" : true;
+};
+
+const getCompanyId = async (userName) => {
+  let result = await db.query(
+    `select companyId from Companies where username='${userName}'`,
+    { types: QueryTypes.SELECT }
+  );
+
+  return result[0][0].companyid;
 };
 
 exports.verifyAccount = async (userName, password) => {
@@ -26,7 +36,9 @@ exports.verifyAccount = async (userName, password) => {
   let isCredentialVerified = verifyPassword(password, passwordHash);
 
   if (isCredentialVerified) {
-    return generateWebToken(userName);
+    var companyId = await getCompanyId(userName);
+
+    return generateWebToken(userName, companyId);
   } else {
     return null;
   }
@@ -36,4 +48,18 @@ const getCompanyPassword = async (userName) => {
   let sql = `select password from Companies where username='${userName}'`;
   const result = await db.query(sql, { types: QueryTypes.SELECT });
   return result[0].length === 0 ? null : result[0][0].password;
+};
+
+exports.createNewDataBaseForCompany = (Id) => {
+  return new Promise((resolve, reject) => {
+    db.query("CREATE DATABASE EMPR000" + Id, function (err) {
+      //db should exist now, initialize Sequelize
+      if (err) {
+        reject(err);
+      } else {
+        console.log("db created");
+        resolve("DB created");
+      }
+    });
+  });
 };

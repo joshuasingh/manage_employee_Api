@@ -29,8 +29,10 @@ var corsOptions = {
 app.use(cookieParser());
 app.use(bodyparser());
 app.use(cors(corsOptions));
+//app.use(cors());
 
 app.use("/Company", require("./routes/Company"));
+app.use("/dashboard", require("./routes/DashBoard"));
 
 app.get("/", (req, res) => {
   res.send("server is running");
